@@ -1,0 +1,12 @@
+{
+  "name": "sales-ai-agent-backend",
+  "version": "1.0.0",
+  "description": "Python FastAPI backend for sales AI agent",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'This is a Python project. Use: python app.py'",
+    "start": "echo 'This is a Python project. Use: python app.py'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
