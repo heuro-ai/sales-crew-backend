@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "echo 'This is a Python project. Use: python app.py'",
-    "start": "echo 'This is a Python project. Use: python app.py'"
+    "start": "echo 'This is a Python project. Use: python app.py'",
+    "build": "echo 'This is a Python project. No build step required.'"
   },
   "dependencies": {},
   "devDependencies": {}
