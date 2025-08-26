@@ -33,6 +33,7 @@ export const Dashboard: React.FC = () => {
       await apiService.healthCheck();
       setSystemStatus('online');
     } catch (error) {
+      console.warn('Backend health check failed:', error);
       setSystemStatus('offline');
     }
   };

@@ -53,6 +53,7 @@ class APIService {
     
     try {
       const response = await fetch(url, {
+        timeout: 10000, // 10 second timeout
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
@@ -67,6 +68,10 @@ class APIService {
 
       return await response.json();
     } catch (error) {
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        console.error(`Backend server not available at ${API_BASE_URL}`);
+        throw new Error('Backend server is not running. Please start the Python FastAPI server on port 8000.');
+      }
       console.error(`API request failed for ${endpoint}:`, error);
       throw error;
     }
