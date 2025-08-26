@@ -9,6 +9,9 @@
     "build": "echo 'This is a Python project. No build step required.'"
   },
   "dependencies": {
+    "@types/react": "^19.1.11",
+    "@types/react-dom": "^19.1.8",
+    "lucide-react": "^0.542.0",
     "react-hot-toast": "^2.6.0"
   }
 }
