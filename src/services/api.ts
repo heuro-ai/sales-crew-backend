@@ -1,8 +1,51 @@
-import { Lead, EmailVerification, CompanyAnalysis, GeneratedEmail, SearchFilters, AIInsight, PsychographicProfile } from '../types';
-
+// API Service for Sales AI Agent Backend
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-backend-url.com/api' 
+  ? 'https://your-backend-url.com' 
   : 'http://localhost:8000';
+
+export interface SearchResult {
+  title: string;
+  snippet: string;
+  link: string;
+}
+
+export interface EmailVerification {
+  email: string;
+  isValid: boolean;
+  status: string;
+}
+
+export interface CompanyAnalysis {
+  company_analysis: {
+    recent_news: string;
+    financial_health: string;
+    verified_challenges: string[];
+    strategic_priorities: string[];
+  };
+  decision_maker_profile: {
+    communication_style: string;
+    personality_indicators: string;
+    personality_type: string;
+    key_achievements: string;
+    recent_activities: string;
+  };
+  synergy_points: {
+    product_fit: string;
+    persuasion_levers: string[];
+    urgency_factors: string[];
+  };
+}
+
+export interface GeneratedEmail {
+  subject: string;
+  body: string;
+}
+
+export interface EmailSendRequest {
+  to_email: string;
+  subject: string;
+  body: string;
+}
 
 class APIService {
   private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -18,7 +61,8 @@ class APIService {
       });
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `API Error: ${response.status} ${response.statusText}`);
       }
 
       return await response.json();
@@ -28,28 +72,17 @@ class APIService {
     }
   }
 
-  // Lead search and discovery
-  async searchLeads(query: string, filters?: SearchFilters, limit: number = 10): Promise<Lead[]> {
-    const searchParams = new URLSearchParams({
-      q: query,
-      limit: limit.toString(),
-      ...(filters?.industry && { industry: filters.industry }),
-      ...(filters?.company_size && { company_size: filters.company_size }),
-      ...(filters?.location && { location: filters.location }),
-      ...(filters?.position_level && { position_level: filters.position_level }),
+  // Google Search API
+  async searchCompanies(query: string, limit: number = 5): Promise<SearchResult[]> {
+    return this.makeRequest<SearchResult[]>('/search', {
+      method: 'POST',
+      body: JSON.stringify({ query, limit }),
     });
-
-    return this.makeRequest<Lead[]>(`/leads/search?${searchParams}`);
   }
 
-  // Get psychographic analysis for a lead
-  async getLeadPsychographics(leadId: string): Promise<PsychographicProfile> {
-    return this.makeRequest<PsychographicProfile>(`/leads/${leadId}/psychographics`);
-  }
-
-  // Verify email address
+  // Email Verification
   async verifyEmail(firstName: string, lastName: string, domain: string): Promise<EmailVerification> {
-    return this.makeRequest<EmailVerification>('/leads/verify-email', {
+    return this.makeRequest<EmailVerification>('/verify-email', {
       method: 'POST',
       body: JSON.stringify({
         first_name: firstName,
@@ -59,14 +92,14 @@ class APIService {
     });
   }
 
-  // Get company analysis
+  // Company Analysis
   async getCompanyAnalysis(
     companyName: string,
     personName: string,
     position: string,
     productDescription: string
   ): Promise<CompanyAnalysis> {
-    return this.makeRequest<CompanyAnalysis>('/leads/analyze-company', {
+    return this.makeRequest<CompanyAnalysis>('/analyze-company', {
       method: 'POST',
       body: JSON.stringify({
         company_name: companyName,
@@ -77,7 +110,7 @@ class APIService {
     });
   }
 
-  // Generate personalized email
+  // Email Generation
   async generateEmail(
     companyName: string,
     decisionMaker: string,
@@ -86,43 +119,33 @@ class APIService {
     productDescription: string,
     analysis?: CompanyAnalysis
   ): Promise<GeneratedEmail> {
-    return this.makeRequest<GeneratedEmail>('/leads/generate-email', {
+    return this.makeRequest<GeneratedEmail>('/generate-email', {
       method: 'POST',
       body: JSON.stringify({
         company_name: companyName,
         decision_maker: decisionMaker,
-        position: position,
+        decision_maker_position: position,
         situation: situation,
         product_description: productDescription,
+        sender_name: 'Sales Agent',
+        sender_position: 'Business Development',
+        sender_company: 'AI Sales Solutions',
         req_info: analysis ? JSON.stringify(analysis) : undefined,
       }),
     });
   }
 
-  // Get AI insights for leads
-  async getAIInsights(leads: Lead[]): Promise<AIInsight[]> {
-    return this.makeRequest<AIInsight[]>('/leads/ai-insights', {
+  // Send Email
+  async sendEmail(emailData: EmailSendRequest): Promise<{ success: boolean; message: string }> {
+    return this.makeRequest<{ success: boolean; message: string }>('/send-email', {
       method: 'POST',
-      body: JSON.stringify({ leads }),
+      body: JSON.stringify(emailData),
     });
   }
 
-  // Save lead to favorites/CRM
-  async saveLead(leadId: string): Promise<{ success: boolean }> {
-    return this.makeRequest<{ success: boolean }>(`/leads/${leadId}/save`, {
-      method: 'POST',
-    });
-  }
-
-  // Export leads data
-  async exportLeads(leadIds: string[], format: 'csv' | 'xlsx' = 'csv'): Promise<Blob> {
-    const response = await fetch(`${API_BASE_URL}/leads/export`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lead_ids: leadIds, format }),
-    });
-
-    return response.blob();
+  // Health Check
+  async healthCheck(): Promise<{ status: string; message: string }> {
+    return this.makeRequest<{ status: string; message: string }>('/health');
   }
 }
 

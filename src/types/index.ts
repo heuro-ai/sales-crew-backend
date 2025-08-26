@@ -1,29 +1,3 @@
-export interface Lead {
-  id: string;
-  company: string;
-  name: string;
-  position: string;
-  email?: string;
-  verified?: boolean;
-  domain: string;
-  linkedin?: string;
-  psychographics?: PsychographicProfile;
-  score: number;
-  source: string;
-}
-
-export interface PsychographicProfile {
-  communication_style: string;
-  personality_type: string;
-  personality_indicators: string;
-  motivations: string[];
-  pain_points: string[];
-  behavioral_traits: string[];
-  decision_factors: string[];
-  urgency_level: 'low' | 'medium' | 'high';
-  influence_style: string;
-}
-
 export interface SearchResult {
   title: string;
   snippet: string;
@@ -34,7 +8,6 @@ export interface EmailVerification {
   email: string;
   isValid: boolean;
   status: string;
-  deliverability: string;
 }
 
 export interface CompanyAnalysis {
@@ -63,18 +36,19 @@ export interface GeneratedEmail {
   body: string;
 }
 
-export interface SearchFilters {
-  industry?: string;
-  company_size?: string;
-  location?: string;
-  position_level?: string;
-  keywords?: string[];
+export interface Lead {
+  id: string;
+  name: string;
+  position: string;
+  company: string;
+  email?: string;
+  verified?: boolean;
+  source: string;
 }
 
-export interface AIInsight {
-  type: 'suggestion' | 'warning' | 'opportunity';
-  title: string;
-  description: string;
-  confidence: number;
-  action?: string;
+export interface APIResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  error?: string;
 }
